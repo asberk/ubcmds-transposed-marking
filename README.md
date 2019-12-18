@@ -17,30 +17,60 @@ in one place.
 
 ## Get up and running
 
-Set `gh_uname` to be your GitHub username on `github.ubc.ca`. Set `course_num`,
-`exercise_num` and `lab_num` appropriately. For technical reasons, it is 
-preferable if the first two are type `str` and the latter type `int` (but it 
-shouldn't matter). 
+The script may be run from the command line. For example:
 
-You can set `fname` manually if you need to. By default, it is set to recognize 
-files like `'*lab##*.ipynb'` (*e.g.,* `fname` would need to be modified if the 
-submitted assignment is an Rmd file). 
+```bash
+python3 write_exercise_to_html.py --course=571 --lab=4 --exercise==3 --throttle=.75
+```
 
-In order to use the `PyGithub` package, you need to load your password into the 
-script. To do this, create a file `ghubcmds.pw` in the same directory as the 
+For documentation, run:
+
+```bash
+python3 write_exercise_to_html.py --help
+```
+
+which should output something like:
+
+> usage: write_exercise_to_html.py [-h] [--uname UNAME] [--course COURSE]
+>                                  [--lab LAB] [--exercise EXERCISE]
+>                                  [--fname FNAME] [--throttle THROTTLE]
+>                                  [--studentsperpage STUDENTSPERPAGE]
+> 
+> optional arguments:
+>   -h, --help            show this help message and exit
+>   --uname UNAME         GitHub Enterprise username.
+>   --course COURSE       DSCI course number (e.g., pass 571 for DSCI 571)
+>   --lab LAB             The lab number (e.g., pass 4 as the argument if you
+>                         want to grade Lab 4).
+>   --exercise EXERCISE   The exercise number (e.g., pass 3 for Exercise 3)
+>   --fname FNAME         A regex used to search for a file pattern.
+>   --throttle THROTTLE   Min duration to wait (in seconds) between pulling lab
+>                         files.
+>   --studentsperpage STUDENTSPERPAGE
+>                         Each HTML page that's generated will contain
+>                         studentsperpage many answers. This is done to manage
+>                         filesize.
+
+Set `uname` to be your GitHub username on `github.ubc.ca`. Set `course`,
+`exercise` and `lab` appropriately (*e.g.*, 
+`--course=571 --lab=4 --exercise==3`).
+
+You can also set the regex used to match the lab file in each student's 
+repository by passing an argument to `fname`. By default, it is set to 
+recognize files like `'*lab##*.ipynb'`. In particular, `fname` is set to 
+recognize `ipynb` files only (*e.g.*, it would need to be modified if the 
+submitted assignments are Rmd files). 
+
+In order to use the `PyGithub` package, the script must be able to load your 
+password. To do this, create a file `ghubcmds.pw` in the same directory as the 
 script, which contains your password. By default, this repository's `.gitignore` 
 is set to ignore `*.pw` files so that one is not accidentally committed to 
-remote. Modify the function `load_ghpw` so that it recognizes your GitHub 
-(Enterprise) username. 
+remote. The function `load_ghpw` will load `ghubcmds.pw` and attempt to use the
+text therein as the password associated with your GitHub Enterprise username.
 
 Finally, the script also requires a csv file (called `classy.csv`), which you 
 can download from the main [classy page](//mds1.cs.ubc.ca). This is simply a 
 list of all the students' GitHub (Enterprise) usernames. 
-
-After modifying the elements above, run the script as:
-```bash
-python3 write_exercise_to_html.py
-```
 
 The output of the script appears in a new folder:  
 `./DSCI{course_num}/Lab{lab_num}/{...}_page##.html`  

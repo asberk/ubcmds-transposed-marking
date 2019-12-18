@@ -23,6 +23,7 @@ Run me:
 Copyright Aaron Berk 2019
 Modify and distribute as you please.
 """
+from argparse import ArgumentParser
 import numpy as np
 import pandas as pd
 from github import Github, GithubException
@@ -34,30 +35,6 @@ import time
 from IPython.display import display, HTML
 import nbformat
 from nbconvert import HTMLExporter
-
-gh_uname = "aberk"
-course_num = "571"
-lab_num = "4"
-exercise_num = 3
-fname = None
-
-students_per_page = 15  # ≤ ~3–4 MB html pages
-throttle = 0.25  # seconds
-
-# Default filename
-if fname is None:
-    fname = f".*lab{lab_num}.*ipynb"
-
-# Classy CSV should be the CSV file containing all of the github ids
-gid_df = pd.read_csv("./classy.csv")
-gid_list = gid_df.id0.values
-
-
-spp = students_per_page
-num_pages = gid_list.size // spp + 1
-gid_pages = {
-    page: gid_list[spp * page : (spp * page + spp)] for page in range(num_pages)
-}
 
 
 def get_repo(gh, gid, lab_num, course_num="571", year_tag=None, throttle=False):
@@ -401,15 +378,78 @@ def write_pages_to_files(
 
 
 def load_ghpw(uname):
-    if uname == "aberk":
-        with open("ghubcmds.pw", "r") as fp:
-            return fp.readline()
-    else:
-        raise ValueError(f"uname {uname} not recognized.")
+    with open("ghubcmds.pw", "r") as fp:
+        return fp.readline()
     return
 
 
 if __name__ == "__main__":
+    parser = ArgumentParser()
+
+    parser.add_argument(
+        "--uname", default="aberk", help="GitHub Enterprise username."
+    )
+    parser.add_argument(
+        "--course",
+        default="571",
+        help="DSCI course number (e.g., pass 571 for DSCI 571)",
+    )
+    parser.add_argument(
+        "--lab",
+        help=(
+            "The lab number (e.g., pass 4 as the argument if you want to "
+            "grade Lab 4)."
+        ),
+    )
+    parser.add_argument(
+        "--exercise",
+        type=int,
+        help="The exercise number (e.g., pass 3 for Exercise 3)",
+    )
+    parser.add_argument(
+        "--fname",
+        default=None,
+        help="A regex used to search for a file pattern.",
+    )
+    parser.add_argument(
+        "--throttle",
+        default=0.25,
+        type=float,
+        help="Min duration to wait (in seconds) between pulling lab files.",
+    )
+    parser.add_argument(
+        "--studentsperpage",
+        default=15,
+        type=int,
+        help=(
+            "Each HTML page that's generated will contain "
+            "studentsperpage many answers. This is done to manage filesize."
+        ),
+    )
+
+    args = parser.parse_args()
+    gh_uname = args.uname
+    course_num = args.course
+    lab_num = args.lab
+    exercise_num = args.exercise
+    fname = args.fname
+    throttle = args.throttle
+    spp = args.studentsperpage
+
+    # Default filename
+    if fname is None:
+        fname = f".*lab{lab_num}.*ipynb"
+
+    # Classy CSV should be the CSV file containing all of the github ids
+    gid_df = pd.read_csv("./classy.csv")
+    gid_list = gid_df.id0.values
+
+    num_pages = gid_list.size // spp + 1
+    gid_pages = {
+        page: gid_list[spp * page : (spp * page + spp)]
+        for page in range(num_pages)
+    }
+
     # initialize github instance
     password = load_ghpw(gh_uname)
     gh = Github(
