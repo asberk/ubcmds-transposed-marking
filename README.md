@@ -20,7 +20,7 @@ in one place.
 The script may be run from the command line. For example:
 
 ```bash
-python3 write_exercise_to_html.py --course=571 --lab=4 --exercise==3 --throttle=.75
+python3 write_exercise_to_html.py --uname=asberk --course=571 --lab=4 --exercise==3 --throttle=.75
 ```
 
 For documentation, run:
@@ -31,25 +31,27 @@ python3 write_exercise_to_html.py --help
 
 which should output something like:
 
-> usage: write_exercise_to_html.py [-h] [--uname UNAME] [--course COURSE]
->                                  [--lab LAB] [--exercise EXERCISE]
->                                  [--fname FNAME] [--throttle THROTTLE]
->                                  [--studentsperpage STUDENTSPERPAGE]
-> 
-> optional arguments:
->   -h, --help            show this help message and exit
->   --uname UNAME         GitHub Enterprise username.
->   --course COURSE       DSCI course number (e.g., pass 571 for DSCI 571)
->   --lab LAB             The lab number (e.g., pass 4 as the argument if you
->                         want to grade Lab 4).
->   --exercise EXERCISE   The exercise number (e.g., pass 3 for Exercise 3)
->   --fname FNAME         A regex used to search for a file pattern.
->   --throttle THROTTLE   Min duration to wait (in seconds) between pulling lab
->                         files.
->   --studentsperpage STUDENTSPERPAGE
->                         Each HTML page that's generated will contain
->                         studentsperpage many answers. This is done to manage
->                         filesize.
+```
+usage: write_exercise_to_html.py [-h] [--uname UNAME] [--course COURSE]
+                                 [--lab LAB] [--exercise EXERCISE]
+                                 [--fname FNAME] [--throttle THROTTLE]
+                                 [--studentsperpage STUDENTSPERPAGE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --uname UNAME         GitHub Enterprise username.
+  --course COURSE       DSCI course number (e.g., pass 571 for DSCI 571)
+  --lab LAB             The lab number (e.g., pass 4 as the argument if you
+                        want to grade Lab 4).
+  --exercise EXERCISE   The exercise number (e.g., pass 3 for Exercise 3)
+  --fname FNAME         A regex used to search for a file pattern.
+  --throttle THROTTLE   Min duration to wait (in seconds) between pulling lab
+                        files.
+  --studentsperpage STUDENTSPERPAGE
+                        Each HTML page that's generated will contain
+                        studentsperpage many answers. This is done to manage
+                        filesize.
+```
 
 Set `uname` to be your GitHub username on `github.ubc.ca`. Set `course`,
 `exercise` and `lab` appropriately (*e.g.*, 

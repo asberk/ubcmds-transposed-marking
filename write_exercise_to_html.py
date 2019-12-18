@@ -16,9 +16,31 @@ Important notes:
   code must be updated to match (cf. `pattern` in `get_cell_loc`).
 
 
-Run me:
+Example usage:
 > cd {...}/ubcmds-transposed-marking/
-> python3 write_exercise_to_html.py
+> python3 write_exercise_to_html.py --uname=asberk --course=571 --lab=4 --exercise==3 --throttle=.75
+
+
+usage: write_exercise_to_html.py [-h] [--uname UNAME] [--course COURSE]
+                                 [--lab LAB] [--exercise EXERCISE]
+                                 [--fname FNAME] [--throttle THROTTLE]
+                                 [--studentsperpage STUDENTSPERPAGE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --uname UNAME         GitHub Enterprise username.
+  --course COURSE       DSCI course number (e.g., pass 571 for DSCI 571)
+  --lab LAB             The lab number (e.g., pass 4 as the argument if you
+                        want to grade Lab 4).
+  --exercise EXERCISE   The exercise number (e.g., pass 3 for Exercise 3)
+  --fname FNAME         A regex used to search for a file pattern.
+  --throttle THROTTLE   Min duration to wait (in seconds) between pulling lab
+                        files.
+  --studentsperpage STUDENTSPERPAGE
+                        Each HTML page that's generated will contain
+                        studentsperpage many answers. This is done to manage
+                        filesize.
+
 
 Copyright Aaron Berk 2019
 Modify and distribute as you please.
