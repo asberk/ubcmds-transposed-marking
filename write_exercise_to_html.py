@@ -1,5 +1,5 @@
 r"""
-write_to_html.py
+write_exercise_to_html.py
 
 Uses the GitHub API to implement a "transposed marking" solution for 
 UBC MDS assignments. A "transposed marking" set-up is where one question is 
@@ -14,6 +14,11 @@ Important notes:
       "\#+.*Exercise " + f"{exercise_number}"
   Necessarily, if the pattern used in the assignments changes, then this 
   code must be updated to match (cf. `pattern` in `get_cell_loc`).
+
+
+Run me:
+> cd {...}/ubcmds-transposed-marking/
+> python3 write_exercise_to_html.py
 
 Copyright Aaron Berk 2019
 Modify and distribute as you please.
