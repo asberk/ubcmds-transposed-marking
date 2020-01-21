@@ -1,8 +1,8 @@
 r"""
 write_exercise_to_html.py
 
-Uses the GitHub API to implement a "transposed marking" solution for 
-UBC MDS assignments. A "transposed marking" set-up is where one question is 
+Uses the GitHub API to implement a "transposed marking" solution for
+UBC MDS assignments. A "transposed marking" set-up is where one question is
 viewable for all students (vs. all questions viewable for one student).
 
 Important notes:
@@ -10,9 +10,9 @@ Important notes:
       Exercise {exercise_num}
   to (exclusive):
       Exercise {exercise_num + 1}.
-  Those start/end cells must match the regex 
+  Those start/end cells must match the regex
       "\#+.*Exercise " + f"{exercise_number}"
-  Necessarily, if the pattern used in the assignments changes, then this 
+  Necessarily, if the pattern used in the assignments changes, then this
   code must be updated to match (cf. `pattern` in `get_cell_loc`).
 
 
@@ -52,7 +52,6 @@ from github import Github, GithubException
 import os
 import base64
 import re
-from copy import copy
 import time
 from IPython.display import display, HTML
 import nbformat
@@ -200,7 +199,7 @@ def persistent_fetch_lab_files(
         throttle=False,
     )
 
-    A wrapper around fetch_lab_files that tries a few times in case the 
+    A wrapper around fetch_lab_files that tries a few times in case the
     instance gets booted.
 
     Inputs
@@ -217,7 +216,7 @@ def persistent_fetch_lab_files(
     Returns
     -------
     lab_files : dict
-        keys matching gid_list, with entries that are strings of JSON objects, 
+        keys matching gid_list, with entries that are strings of JSON objects,
         suitable to be passed to nbformat.reads(...)
     """
     lab_files = fetch_lab_files(
@@ -437,10 +436,22 @@ if __name__ == "__main__":
         help="A regex used to search for a file pattern.",
     )
     parser.add_argument(
-        "--throttle",
-        default=0.25,
-        type=float,
-        help="Min duration to wait (in seconds) between pulling lab files.",
+        "--gidpath",
+        default="classy.csv",
+        type=str,
+        help=(
+            "The list of the students GitHub IDs to use. "
+            "Note: a list with non-matching entries may cause "
+            "the script to break or hang."
+        ),
+    )
+    parser.add_argument(
+        "--section",
+        default=None,
+        type=str,
+        help=(
+            "Allows filtering by Lab Section (e.g., section L02). Default: all sections."
+        ),
     )
     parser.add_argument(
         "--studentsperpage",
@@ -451,6 +462,12 @@ if __name__ == "__main__":
             "studentsperpage many answers. This is done to manage filesize."
         ),
     )
+    parser.add_argument(
+        "--throttle",
+        default=0.25,
+        type=float,
+        help="Min duration to wait (in seconds) between pulling lab files.",
+    )
 
     args = parser.parse_args()
     gh_uname = args.uname
@@ -458,6 +475,8 @@ if __name__ == "__main__":
     lab_num = args.lab
     exercise_num = args.exercise
     fname = args.fname
+    gid_filepath = args.gidpath
+    section = args.section
     throttle = args.throttle
     spp = args.studentsperpage
 
@@ -465,8 +484,22 @@ if __name__ == "__main__":
     if fname is None:
         fname = f".*lab{lab_num}.*ipynb"
 
+    if section is None:
+        section_str = "in all sections"
+    else:
+        section_str = f"in section {section}"
+
+    print(f"Accessing DSCI {course_num} Lab {lab_num} as {gh_uname}.")
+    print(f"Looking for GIDs {section_str} matching those in {gid_filepath}.")
+    print(f"Searching for exercise {exercise_num} in files matching {fname}.")
+    print(f"throttle: {throttle}, students per output page: {spp}")
+
     # Classy CSV should be the CSV file containing all of the github ids
-    gid_df = pd.read_csv("./classy.csv")
+    gid_df = pd.read_csv(gid_filepath)  # pd.read_csv("./classy.csv")
+    if section is not None:
+        gid_df = gid_df.loc[
+            gid_df.filter(regex="[Ss]ection").values.ravel() == section
+        ]
     gid_list = gid_df.id0.values
 
     num_pages = gid_list.size // spp + 1
@@ -502,4 +535,3 @@ if __name__ == "__main__":
         course_num,
         save_dir=save_dir,
     )
-
