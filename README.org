@@ -72,24 +72,24 @@ Set ~uname~ to be your GitHub username on ~github.ubc.ca~. Set ~course~,
 
 You can also set the regex used to match the lab file in each student's 
 repository by passing an argument to ~fname~. By default, it is set to 
-recognize files like ~'\*lab##\*.ipynb'~. In particular, ~fname~ is set to 
+recognize files like ='*lab##*.ipynb'=. In particular, ~fname~ is set to 
 recognize ~ipynb~ files only (/e.g./, it would need to be modified if the 
 submitted assignments are Rmd files). 
 
 In order to use the ~PyGithub~ package, the script must be able to load your 
 password. To do this, create a file ~ghubcmds.pw~ in the same directory as the 
 script, which contains your password. By default, this repository's ~.gitignore~ 
-is set to ignore ~\*.pw~ files so that one is not accidentally committed to 
+is set to ignore =*.pw= files so that one is not accidentally committed to 
 remote. The function ~load_ghpw~ will load ~ghubcmds.pw~ and attempt to use the
 text therein as the password associated with your GitHub Enterprise username.
 
-Finally, the script also requires a csv file (called ~classy.csv~), which you 
-can download from the main [classy page](//mds1.cs.ubc.ca). This is simply a 
-list of all the students' GitHub (Enterprise) usernames. 
+Finally, the script also requires a csv file (called ~classy.csv~), which you
+can download from the main [[https://mds.cs.ubc.ca][classy page]]. This is simply a list of all the
+students' GitHub (Enterprise) usernames.
 
-The output of the script appears in a new folder:  
-~./DSCI{course_num}/Lab{lab_num}/{...}_page##.html~  
-~./DSCI{course_num}/Lab{lab_num}/style##.css~
+The output of the script appears in a new folder:
+ * ~./DSCI{course_num}/Lab{lab_num}/{...}_page##.html~  
+ * ~./DSCI{course_num}/Lab{lab_num}/style##.css~
 
 ** Known Issues
 
