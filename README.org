@@ -67,19 +67,19 @@ optional arguments:
 #+end_example
 
 Set ~uname~ to be your GitHub username on ~github.ubc.ca~. Set ~course~,
-~exercise~ and ~lab~ appropriately (*e.g.*, 
+~exercise~ and ~lab~ appropriately (/e.g./, 
 ~--course=571 --lab=4 --exercise 3 4 5~).
 
 You can also set the regex used to match the lab file in each student's 
 repository by passing an argument to ~fname~. By default, it is set to 
-recognize files like ~'*lab##*.ipynb'~. In particular, ~fname~ is set to 
-recognize ~ipynb~ files only (*e.g.*, it would need to be modified if the 
+recognize files like ~'\*lab##\*.ipynb'~. In particular, ~fname~ is set to 
+recognize ~ipynb~ files only (/e.g./, it would need to be modified if the 
 submitted assignments are Rmd files). 
 
 In order to use the ~PyGithub~ package, the script must be able to load your 
 password. To do this, create a file ~ghubcmds.pw~ in the same directory as the 
 script, which contains your password. By default, this repository's ~.gitignore~ 
-is set to ignore ~*.pw~ files so that one is not accidentally committed to 
+is set to ignore ~\*.pw~ files so that one is not accidentally committed to 
 remote. The function ~load_ghpw~ will load ~ghubcmds.pw~ and attempt to use the
 text therein as the password associated with your GitHub Enterprise username.
 
@@ -105,9 +105,9 @@ The output of the script appears in a new folder:
 
 ** Requirements
 
- * [~PyGithub~](https://github.com/PyGithub/PyGithub)
- * [~nbformat~](https://github.com/jupyter/nbformat)
- * [~nbconvert~](https://github.com/jupyter/nbconvert)
+ * [[https://github.com/PyGithub/PyGithub][~PyGithub~]]
+ * [[https://github.com/jupyter/nbformat][~nbformat~]]
+ * [[https://github.com/jupyter/nbconvert][~nbconvert~]]
  * ~IPython~ 
  * ~pandas~
  * ~numpy~
