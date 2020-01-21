@@ -56,7 +56,9 @@ def save_files(save_dir, obj_dict):
     return
 
 
-parser = ArgumentParser()
+parser = ArgumentParser(
+    description="Slice exercises from student lab files for easier marking."
+)
 
 parser.add_argument(
     "--uname", default="aberk", help="GitHub Enterprise username."
