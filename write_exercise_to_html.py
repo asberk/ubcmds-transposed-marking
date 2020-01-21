@@ -18,7 +18,7 @@ Important notes:
 
 Example usage:
 > cd {...}/ubcmds-transposed-marking/
-> python3 write_exercise_to_html.py --uname=asberk --course=571 --lab=4 --exercise==3 --throttle=.75
+> python3 write_exercise_to_html.py --uname=aberk --course=572 --lab=1 --exercise 3 4 5 --section=L02 --throttle=.75
 
 
 usage: write_exercise_to_html.py [-h] [--uname UNAME] [--course COURSE]
@@ -45,7 +45,6 @@ optional arguments:
 Copyright Aaron Berk 2019
 Modify and distribute as you please.
 """
-from argparse import ArgumentParser
 import numpy as np
 import pandas as pd
 from github import Github, GithubException
@@ -56,6 +55,8 @@ import time
 from IPython.display import display, HTML
 import nbformat
 from nbconvert import HTMLExporter
+
+import util
 
 
 def get_repo(gh, gid, lab_num, course_num="571", year_tag=None, throttle=False):
@@ -279,10 +280,17 @@ def get_cell_loc(notebook, exercise_number):
                 pattern.format(ex_num=exercise_number + 1), cell_source
             ):
                 b = i
+        if (a > 0) and (b > 0):
+            # No need to search through cells once we've
+            # found what we're looking for.
+            break
     if a == -1:
         print("Error: get_cell_loc: a not found.")
     elif b == -1:
-        print("Error: get_cell_loc: b not found.")
+        print(
+            "Warning: get_cell_loc: b not found; using b = len(notebook['cells'])"
+        )
+        b = len(notebook["cells"])
     elif a >= b:
         print(f"Error: get_cell_loc: something went wrong: a = {a}, b = {b}")
     return a, b
@@ -462,71 +470,8 @@ def load_ghpw(uname):
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
+    args = util.parser.parse_args()
 
-    parser.add_argument(
-        "--uname", default="aberk", help="GitHub Enterprise username."
-    )
-    parser.add_argument(
-        "--course", help="DSCI course number (e.g., pass 571 for DSCI 571)",
-    )
-    parser.add_argument(
-        "--lab",
-        help=(
-            "The lab number (e.g., pass 4 as the argument if you want to "
-            "grade Lab 4)."
-        ),
-    )
-    parser.add_argument(
-        "--exercise",
-        nargs="*",
-        type=int,
-        default=[],
-        help=(
-            "The exercise number (e.g., pass 3 for Exercise 3; "
-            " pass 3 4 5 for Exercises 3--5)"
-        ),
-    )
-    parser.add_argument(
-        "--fname",
-        default=None,
-        help="A regex used to search for a file pattern.",
-    )
-    parser.add_argument(
-        "--gidpath",
-        default="classy.csv",
-        type=str,
-        help=(
-            "The list of the students GitHub IDs to use. "
-            "Note: a list with non-matching entries may cause "
-            "the script to break or hang."
-        ),
-    )
-    parser.add_argument(
-        "--section",
-        default=None,
-        type=str,
-        help=(
-            "Allows filtering by Lab Section (e.g., section L02). Default: all sections."
-        ),
-    )
-    parser.add_argument(
-        "--studentsperpage",
-        default=15,
-        type=int,
-        help=(
-            "Each HTML page that's generated will contain "
-            "studentsperpage many answers. This is done to manage filesize."
-        ),
-    )
-    parser.add_argument(
-        "--throttle",
-        default=0.25,
-        type=float,
-        help="Min duration to wait (in seconds) between pulling lab files.",
-    )
-
-    args = parser.parse_args()
     gh_uname = args.uname
     course_num = args.course
     lab_num = args.lab
@@ -536,35 +481,30 @@ if __name__ == "__main__":
     section = args.section
     throttle = args.throttle
     spp = args.studentsperpage
+    doSave = args.doSave
 
     assert gh_uname is not None, f"Expected gh_uname but found None"
     assert course_num is not None, f"Expected course_num but found None"
     assert lab_num is not None, f"Expected lab_num but found None"
 
     # Parse exercise_num correctly
-    if isinstance(exercise_num, (list, tuple)):
-        if len(exercise_num) == 0:
-            raise ValueError("exercise_num is mandatory")
-        elif len(exercise_num) == 1:
-            exercise_num = exercise_num[0]
-            assert isinstance(exercise_num, np.int), (
-                f"Expected integer or list of integers for "
-                f"exercise_num but got {exercise_num}."
-            )
+    exercise_num = util.format_exercise_num(exercise_num)
 
     # Default filename
     if fname is None:
         fname = f".*lab{lab_num}.*ipynb"
 
-    if section is None:
-        section_str = "in all sections"
-    else:
-        section_str = f"in section {section}"
-
-    print(f"Accessing DSCI {course_num} Lab {lab_num} as {gh_uname}.")
-    print(f"Looking for GIDs {section_str} matching those in {gid_filepath}.")
-    print(f"Searching for exercise {exercise_num} in files matching {fname}.")
-    print(f"throttle: {throttle}, students per output page: {spp}")
+    util.print_info(
+        gh_uname,
+        course_num,
+        lab_num,
+        exercise_num,
+        fname,
+        gid_filepath,
+        section,
+        throttle,
+        spp,
+    )
 
     # Classy CSV should be the CSV file containing all of the github ids
     gid_df = pd.read_csv(gid_filepath)  # pd.read_csv("./classy.csv")
@@ -597,6 +537,10 @@ if __name__ == "__main__":
     save_dir = f"./DSCI{course_num}/Lab{lab_num}/"
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+
+    # Useful in case something goes wrong.
+    if doSave is True:
+        util.save_files(save_dir, lab_files)
 
     # write exercises to HTML pages
     write_pages_to_files(
