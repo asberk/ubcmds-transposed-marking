@@ -400,8 +400,11 @@ def write_pages_to_files(
 
 
 def load_ghpw(uname):
-    with open("ghubcmds.pw", "r") as fp:
-        return fp.readline()
+    if uname == "aberk":
+        with open("ghubcmds.pw", "r") as fp:
+            return fp.readline()
+    else:
+        raise ValueError(f"uname {uname} not recognized.")
     return
 
 
