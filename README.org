@@ -105,7 +105,7 @@ The output of the script appears in a new folder:
 
 ** Requirements
 
- * =[[https://github.com/PyGithub/PyGithub][PyGithub]]=
+ * [[https://github.com/PyGithub/PyGithub][PyGithub]]
  * [[https://github.com/jupyter/nbformat][nbformat]]
  * [[https://github.com/jupyter/nbconvert][nbconvert]]
  * ~IPython~ 
