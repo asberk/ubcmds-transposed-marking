@@ -329,6 +329,48 @@ def get_exercise_from_lab(lab, exercise_num, do_display=False):
     return
 
 
+def get_exercises_from_lab(lab, exercise_nums, do_display=False):
+    """
+    get_exercises_from_lab(lab, exercise_nums, do_display=False)
+
+    Takes lab + a list of the exercise numbers to return, and uses some nbformat
+    magic to generate html containing only the cells corresponding to
+    exercise_num. It displays this if do_display is True, and returns the html +
+    css/resources/etc. if do_display is False.
+
+    See https://nbconvert.readthedocs.io/en/latest/nbconvert_library.html
+    for an extremely helpful tutorial.
+
+    Inputs
+    ------
+    lab : str
+    exercise_nums : list of int
+    do_display : bool
+
+    Returns
+    -------
+    body : HTML string
+    resources: dict
+    """
+    lab_fmt = nbformat.reads(lab, as_version=4)
+    ab_list = [get_cell_loc(lab_fmt, ex_num) for ex_num in exercise_nums]
+    cells = sum([lab_fmt["cells"][a:b] for a, b in ab_list], [])
+    lab_fmt["cells"] = cells
+
+    # Instantiate the exporter with the `basic` template
+    html_exporter = HTMLExporter()
+    html_exporter.template_file = "basic"
+
+    # Process the notebook we loaded earlier
+    (body, resources) = html_exporter.from_notebook_node(lab_fmt)
+
+    if do_display:
+        display(HTML(body))
+    else:
+        return body, resources
+    return
+
+
 def write_pages_to_files(
     lab_files, gid_pages, exercise_num, lab_num, course_num, save_dir=None
 ):
@@ -340,7 +382,7 @@ def write_pages_to_files(
     ------
     lab_files : list
     gid_pages : dict of lists
-    exercise_num : float
+    exercise_num : int or list of ints
     lab_num : string
     course_num : string
     save_dir : string
@@ -351,14 +393,28 @@ def write_pages_to_files(
     """
     if save_dir is None:
         save_dir = "./"
-    if not isinstance(exercise_num, np.int):
+
+    if isinstance(exercise_num, (list, tuple)) and (len(exercise_num) != 1):
+        exercise_num_str = "".join([f"{x}" for x in exercise_num])
+        parser = get_exercises_from_lab
+    elif isinstance(exercise_num, np.int):
+        exercise_num_str = f"{exercise_num}"
+        parser = get_exercise_from_lab
+    else:
+        print(
+            f"Attempting type coercion of exercise_num {exercise_num} "
+            f"to int, even though it may be iterable"
+        )
         exercise_num = int(exercise_num)
+        exercise_num_str = f"{exercise_num}"
+        parser = get_exercise_from_lab
+
     if not isinstance(lab_num, str):
         lab_num = f"{lab_num}"
     if not isinstance(course_num, str):
         course_num = f"{course_num}"
 
-    fname_html = f"DSCI{course_num}_lab{lab_num}_exercise{exercise_num}"
+    fname_html = f"DSCI{course_num}_lab{lab_num}_exercise{exercise_num_str}"
     fname_html = fname_html + "_page{page_number}.html"
 
     # Write paginated HTML pages
@@ -379,22 +435,20 @@ def write_pages_to_files(
             else:
                 fp.write(f"\n\n<h1>{gid}</h1>\n\n")
                 fp.write(
-                    get_exercise_from_lab(
-                        lab_files[gid], exercise_num, do_display=False
-                    )[0]
+                    parser(lab_files[gid], exercise_num, do_display=False)[0]
                 )
         fp.write("</body>")
         fp.close()
-        print(r"\t" + f"{fname_page}")
+        print("\t" + f"{fname_page}")
     # Write the CSS files to the same folder
-    _, resources = get_exercise_from_lab(
+    _, resources = parser(
         list(lab_files.values())[0], exercise_num, do_display=False
     )
     print()
     for i, css_lines in enumerate(resources["inlining"]["css"]):
         with open(save_dir + f"style{i}.css", "w") as fp:
             fp.write(css_lines)
-        print(r"\t" + f"style{i}.css")
+        print("\t" + f"style{i}.css")
     return
 
 
@@ -414,9 +468,7 @@ if __name__ == "__main__":
         "--uname", default="aberk", help="GitHub Enterprise username."
     )
     parser.add_argument(
-        "--course",
-        default="571",
-        help="DSCI course number (e.g., pass 571 for DSCI 571)",
+        "--course", help="DSCI course number (e.g., pass 571 for DSCI 571)",
     )
     parser.add_argument(
         "--lab",
@@ -427,8 +479,13 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--exercise",
+        nargs="*",
         type=int,
-        help="The exercise number (e.g., pass 3 for Exercise 3)",
+        default=[],
+        help=(
+            "The exercise number (e.g., pass 3 for Exercise 3; "
+            " pass 3 4 5 for Exercises 3--5)"
+        ),
     )
     parser.add_argument(
         "--fname",
@@ -479,6 +536,21 @@ if __name__ == "__main__":
     section = args.section
     throttle = args.throttle
     spp = args.studentsperpage
+
+    assert gh_uname is not None, f"Expected gh_uname but found None"
+    assert course_num is not None, f"Expected course_num but found None"
+    assert lab_num is not None, f"Expected lab_num but found None"
+
+    # Parse exercise_num correctly
+    if isinstance(exercise_num, (list, tuple)):
+        if len(exercise_num) == 0:
+            raise ValueError("exercise_num is mandatory")
+        elif len(exercise_num) == 1:
+            exercise_num = exercise_num[0]
+            assert isinstance(exercise_num, np.int), (
+                f"Expected integer or list of integers for "
+                f"exercise_num but got {exercise_num}."
+            )
 
     # Default filename
     if fname is None:
