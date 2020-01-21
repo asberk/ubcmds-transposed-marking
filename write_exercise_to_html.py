@@ -18,13 +18,19 @@ Important notes:
 
 Example usage:
 > cd {...}/ubcmds-transposed-marking/
-> python3 write_exercise_to_html.py --uname=aberk --course=572 --lab=1 --exercise 3 4 5 --section=L02 --throttle=.75
+> python3 write_exercise_to_html.py --uname=aberk --course=572 --lab=1
+                                    --exercise 3 4 --section=L02 --throttle=.75
 
 
 usage: write_exercise_to_html.py [-h] [--uname UNAME] [--course COURSE]
-                                 [--lab LAB] [--exercise EXERCISE]
-                                 [--fname FNAME] [--throttle THROTTLE]
+                                 [--lab LAB]
+                                 [--exercise [EXERCISE [EXERCISE ...]]]
+                                 [--fname FNAME] [--gidpath GIDPATH]
+                                 [--section SECTION]
                                  [--studentsperpage STUDENTSPERPAGE]
+                                 [--throttle THROTTLE] [--doSave DOSAVE]
+
+Slice exercises from student lab files for easier marking.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -32,15 +38,23 @@ optional arguments:
   --course COURSE       DSCI course number (e.g., pass 571 for DSCI 571)
   --lab LAB             The lab number (e.g., pass 4 as the argument if you
                         want to grade Lab 4).
-  --exercise EXERCISE   The exercise number (e.g., pass 3 for Exercise 3)
+  --exercise [EXERCISE [EXERCISE ...]]
+                        The exercise number (e.g., pass 3 for Exercise 3; pass
+                        3 4 5 for Exercises 3--5)
   --fname FNAME         A regex used to search for a file pattern.
-  --throttle THROTTLE   Min duration to wait (in seconds) between pulling lab
-                        files.
+  --gidpath GIDPATH     The list of the students GitHub IDs to use. Note: a
+                        list with non-matching entries may cause the script to
+                        break or hang.
+  --section SECTION     Allows filtering by Lab Section (e.g., section L02).
+                        Default: all sections.
   --studentsperpage STUDENTSPERPAGE
                         Each HTML page that's generated will contain
                         studentsperpage many answers. This is done to manage
                         filesize.
-
+  --throttle THROTTLE   Min duration to wait (in seconds) between pulling lab
+                        files.
+  --doSave DOSAVE       Whether to save intermediate lab files as .pkl.bz2
+                        objects.
 
 Copyright Aaron Berk 2019
 Modify and distribute as you please.
