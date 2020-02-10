@@ -506,7 +506,7 @@ if __name__ == "__main__":
 
     # Default filename
     if fname is None:
-        fname = f".*lab{lab_num}.*ipynb"
+        fname = f".*lab.?{lab_num}.*ipynb"
 
     util.print_info(
         gh_uname,
